@@ -78,6 +78,68 @@ var_dump($user);
 
 
 1.3.  Testing en PHP
+- Define la funcionalidad
+- Garantiza que la implementacion es correcta
+- Evita futuros problemas
+
+- Preparar(Arrange): Construir el contexto de la prueba
+- Actuar(Act): Ejecutar la accion que queremos probar
+- Verificar(Assert): Evaluar que los resultados sean los esperados
+
+composer require --dev phpunit/phpunit
+
+- tests/UserTest.php
+class UserTest extends PHPUnit_Framework_TestCase
+{
+    public function testCreateUser()
+    {
+        // $user = null;
+        $user = new \App\User('djmiguelarango@gmail.com', '12345');
+        $this->assertInstanceOf(\App\User::class, $user);
+    }
+
+    public function haveFirstName()
+    {
+        $user = new \App\User('djmiguelarango@gmail.com', '12345');
+        $user->setName('Miguel', 'MGM');
+        $first_name = $user->getFirstName();
+        $this->assertEquals('Miguel', $first_name);
+    }
+}
+
+./vendor/bin/phpunit --colors=auto tests/UserTest
+
+- src/Author.php
+class Author extends User
+{
+    public function __construct($email, $password, $key)
+    {
+        parent::__construct($email, $password);
+        if ($key != 'AUTHOR') {
+            throw new \InvalidArgumentException("Invalid argument key.");
+        }
+    }
+}
+
+- tests/AuthorTest.php
+class AuthorTest extends PHPUnit_Framework_TestCase
+{
+    public function testCreateAuthor()
+    {
+        $author = new \App\Author('djmiguelarango@gmail.com', '12345', 'AUTHOR');
+        $this->assertInstanceOf(\App\Author::class, $author);
+    }
+
+    public function testCreateAuthorKey()
+    {
+        $this->setExpectedException(InvalidArgumentException::class);
+        $author = new \App\Author('djmiguelarango@gmail.com', '12345', 'MIGUEL');
+    }
+}
+
+/vendor/bin/phpunit --colors=auto tests
+
+
 1.4.  Patrones de Diseño
 1.5.  Entidades con PHP
 1.6.  Objetos de valor con PHP
