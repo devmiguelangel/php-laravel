@@ -140,9 +140,49 @@ class AuthorTest extends PHPUnit_Framework_TestCase
 /vendor/bin/phpunit --colors=auto tests
 
 
-1.4.  Patrones de Diseño
-1.5.  Entidades con PHP
-1.6.  Objetos de valor con PHP
+1.4.  Entidades con PHP
+- Objeto con identidad unica a traves del tiempo
+- Parte del modelo del problema (Modelo de Dominio)
+- Mejor candidato a enriquecer
+
+- src/Post.php
+class Post
+{
+    private $author;
+    private $title;
+    private $body;
+    
+    public function __construct(Author $author, $title, $body)
+    {
+        $this->author = $author;
+        $this->title  = $title;
+        $this->body   = $body;
+    }
+
+    public function getBody()
+    {
+        return $this->body;
+    }
+
+    public function getAuthor()
+    {
+        return $this->author->getFirstName();
+    }
+}
+
+- tests/PostTest.php
+class PostTest extends PHPUnit_Framework_TestCase
+{
+    public function testNameAuthor()
+    {
+        $author = new \App\Author('djmiguelarango@gmail.com', '12345', 'AUTHOR');
+        $author->setName('Miguel', 'MGM');
+        $post = new \App\Post($author, 'An title', 'An post body');
+        $this->assertEquals('Miguel', $post->getAuthor());
+    }
+}
+
+1.5.  Objetos de valor con PHP
 
 2.
 3.
