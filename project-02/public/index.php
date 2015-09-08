@@ -7,6 +7,6 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 $request = Request::capture();
 
-$home = new HomeController();
+$controller = new HomeController();
 
-echo $home->index($request);
+$controller->index($request);
