@@ -229,8 +229,49 @@ class EmailTest extends PHPUnit_Framework_TestCase
 
 2.  PHP para web, Modelos Vistas Controladores y Colecciones
 2.1.  Iniciando en PHP para web
+- Que es la WEB?
+  - Protocolo HTTP (Verbos HTTP [GET - POST - PUT - DELETE])
+  - Lenguaje HTML
+  - Arquitectura Cliente - Servidor
+  - Antes: Pedir un archivo
+  - PHP Hoy: Ruteo de URI
+  - PHP + JS: JSON API + Client-side programming
+
+
 2.2.  Modelo Vista Contralador en PHP
+MVC (Modelo Visa Controlador)
+- Separacion de responsabilidades
+  - Medelo: Logica de negocio (Modelo de Dominio)
+  - Vista: Presentacion visual
+  - Controlador: Coordina las acciones del usuario
+
+
 2.3.  Controlador
+- Se asocia a uno o mas pedidos HTTP
+- Traduce el pedido HTTP en un mensaje de dominio
+- Arma la respuesta al pedido
+
+composer require illuminate/http
+
+- src/Http/Controllers/HomeController.php
+class HomeController
+{
+    public function index(Request $request)
+    {
+        return 'Hellow ' . $request->getRequestUri() . ' at HomeController';
+    }
+}
+
+- public/index.php
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$request = Request::capture();
+$home = new HomeController();
+echo $home->index($request);
+
+php -S localhost:3000 public/index.php
+
+
 2.4.  Vista
 2.5.  Modelo
 2.6.  Colecciones
