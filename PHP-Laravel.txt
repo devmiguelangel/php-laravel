@@ -182,10 +182,77 @@ class PostTest extends PHPUnit_Framework_TestCase
     }
 }
 
-1.5.  Objetos de valor con PHP
 
-2.
-3.
+1.5.  Objetos de valor con PHP
+- Su identidad esta basada en el valor de sus atributos
+- Tienen comportamientos importante para el dominio
+- Quizas antes eran un tipo basico
+- Suelen ser inmutables (que no se pueden modificar)
+
+- src/Email.php
+class Email
+{
+    private $address;
+
+    public function __construct($address)
+    {
+        if (! filter_var($address, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException('Email invalid ' . $address);
+        }
+        $this->address = $address;
+    }
+
+    public function getAddress()
+    {
+        return $this->address;
+    }
+}
+
+- tests/EmailTest.php
+class EmailTest extends PHPUnit_Framework_TestCase
+{
+    public function testEmailIsValid()
+    {
+        $email = new Email('djmiguelarango@gmail.com');
+        $this->assertInstanceOf(Email::class, $email);
+    }
+
+    public function testEmailIsInvalid()
+    {
+        $this->setExpectedException(\InvalidArgumentException::class);
+        $email = new Email('djmiguelarango@gmail');
+    }
+}
+
+./vendor/bin/phpunit --color=auto tests/EmailTest
+
+
+2.  PHP para web, Modelos Vistas Controladores y Colecciones
+2.1.  Iniciando en PHP para web
+2.2.  Modelo Vista Contralador en PHP
+2.3.  Controlador
+2.4.  Vista
+2.5.  Modelo
+2.6.  Colecciones
+
+
+3.  Buenas practicas de PHP
+3.1.  Arquitectura de capas
+3.2.  Servicios
+3.3.  Persistencia y Base de Datos
+3.4.  Repositorios
+3.5.  Errores y Excepciones
+
+
 4.
 5.
 6.
+
+7. Ignite
+- Evitar Data Transfer
+- En definiciones (Clases - funciones - Interfaces) no cerrar PHP
+- Deploy PHP (Laravel Envoyer)
+- No usar echo en produccion
+- Encapsulamiento (Las propiedades de un objeto solo se pueden cambiar mediante los metodos definidos para ese objeto)
+- Cohecion - La cohesión tiene que ver con que cada módulo se refiera a un único proceso o entidad, cada módulo (función o procedimiento) realiza una única tarea trabajando sobre una sola estructura de datos.
+- Acoplamiento - El acoplamiento mide el grado de relacionamiento de un módulo con los demás, se logra bajo acoplamiento reduciendo las interacciones entre procedimientos y funciones, reduciendo la cantidad y complejidad de los parámetros y disminuyendo al mínimo los parámetros por referencia y los efectos colaterales.

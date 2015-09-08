@@ -12,7 +12,7 @@ class AuthorTest extends PHPUnit_Framework_TestCase
 
     public function testCreateAuthorKey()
     {
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->setExpectedException(\InvalidArgumentException::class);
 
         $author = new \App\Author('djmiguelarango@gmail.com', '12345', 'MIGUEL');
     }
