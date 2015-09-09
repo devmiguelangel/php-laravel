@@ -334,6 +334,50 @@ $controller->index($request);
 
 
 2.5.  Modelo
+- Representa el problema y la solucion implementada
+- Separa la logica de negocio de la presentacion
+- Compone un Modelo de Dominio
+  - Ayuda a entender un problema
+  - Utiliza el idioma del dominio
+  - Mejora la comunicacion devs - cliente
+  - Crece junto con el negocio
+
+- src/Http/Controllers/HomeController.php
+public function index(Request $request)
+{
+    $author = new Author('djmiguelarango@gmail.com', 'secret', 'AUTHOR');
+    $author->setName('Miguel', 'MGM');
+
+    $posts = [
+        new Post($author, 'Post #1', 'This is first post'),
+        new Post($author, 'Post #2', 'This is second post'),
+        new Post($author, 'Post #3', 'This is third post'),
+        new Post($author, 'Post #4', 'This is fourth post'),
+    ];
+
+    $params = [
+        'message' => 'Hello from a View!',
+        'posts'   => $posts,
+    ];
+
+    $view = new View('home', $params);
+    $response = $view->render();
+    $response->send();
+}
+
+- resources/views/home.php
+<ul>
+    <?php /** @type App\Post $post */
+    foreach($posts as $post): ?>
+        <li>
+            <h2><?= $post->getTitle() ;?> by <small><?= $post->getAuthor() ;?></small></h2>
+            <p>
+                <?= $post->getBody() ;?>
+            </p>
+        </li>
+    <?php endforeach ?>
+</ul>
+
 2.6.  Colecciones
 
 
