@@ -3,35 +3,47 @@
 namespace App\Http\Controllers;
 
 
-use App\Author;
+use App\FakeDatabase;
 use App\Http\Views\View;
-use App\Post;
 use Illuminate\Http\Request;
+
 
 class HomeController
 {
+    private $db;
+
+    public function __construct(FakeDatabase $database)
+    {
+        $this->db = $database;
+    }
+
     public function index(Request $request)
     {
-        $author = new Author('djmiguelarango@gmail.com', 'secret', 'AUTHOR');
-        $author->setName('Miguel', 'MGM');
-
-        $posts = [
-            new Post($author, 'Post #1', 'This is first post'),
-            new Post($author, 'Post #2', 'This is second post'),
-            new Post($author, 'Post #3', 'This is third post'),
-            new Post($author, 'Post #4', 'This is fourth post'),
-        ];
+        $posts = $this->db->posts();
+        $first = $posts->first();
 
         // var_dump($request);
         $params = [
             'message' => 'Hello from a View!',
             'posts'   => $posts,
+            'first'   => $first,
         ];
 
+        // $view = new View('home', $params);
         $view = new View('home', $params);
+        return $view->render();
+        // $response = $view->render();
+        // $response->send();
+    }
 
-        $response = $view->render();
+    public function show($id)
+    {
+        $posts = $this->db->posts();
 
-        $response->send();
+        $view = new View('post', [
+            'post' => $posts->get($id)
+        ]);
+
+        return $view->render();
     }
 }

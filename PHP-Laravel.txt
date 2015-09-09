@@ -379,6 +379,99 @@ public function index(Request $request)
 </ul>
 
 2.6.  Colecciones
+- Objetos que representan una coleccion de otros
+- Buscar entre la coleccion
+- Agregar y quitar de la coleccion
+- Filtrar la coleccion
+
+composer require illuminate/view
+composer require illuminate/routing
+
+- src/FakeDatabase.php
+class FakeDatabase
+{
+    public function posts()
+    {
+        $author = new Author('djmiguelarango@gmail.com', 'secret', 'AUTHOR');
+        $author->setName('Miguel', 'MGM');
+
+        return new Collection([
+            1 => new Post($author, 'Post #1', 'This is first post'),
+            2 => new Post($author, 'Post #2', 'This is second post'),
+            3 => new Post($author, 'Post #3', 'This is third post'),
+            4 => new Post($author, 'Post #4', 'This is fourth post'),
+        ]);
+    }
+}
+
+- src/Http/Controllers/HomeController.php
+class HomeController
+{
+    private $db;
+
+    public function __construct(FakeDatabase $database)
+    {
+        $this->db = $database;
+    }
+
+    public function index(Request $request)
+    {
+        $posts = $this->db->posts();
+        $first = $posts->first();
+
+        $params = [
+            'message' => 'Hello from a View!',
+            'posts'   => $posts,
+            'first'   => $first,
+        ];
+
+        $view = new View('home', $params);
+        return $view->render();
+    }
+
+    public function show($id)
+    {
+        $posts = $this->db->posts();
+
+        $view = new View('post', [
+            'post' => $posts->get($id)
+        ]);
+
+        return $view->render();
+    }
+}
+
+- resources/views/post.php
+<h1>
+    <?php /** @var \App\Post $post */ ?>
+    <?= $post->getTitle() ;?>
+    <small><?= $post->getAuthor() ;?></small>
+</h1>
+<p><?= $post->getBody() ;?></p>
+
+- src/Application.php
+class Application
+{
+    private $container;
+
+    public function __construct(Container $container)
+    {
+        $this->container = $container;
+    }
+
+    public function run()
+    {
+        $router = new Router(new Dispatcher($this->container), $this->container);
+        $router->get('/', HomeController::class . '@index');
+        $router->get('/post/{id}', HomeController::class . '@show');
+        $response = $router->dispatch(Request::capture());
+        $response->send();
+    }
+}
+
+- public/index.php
+$application = new \App\Application(new \Illuminate\Container\Container());
+$application->run();
 
 
 3.  Buenas practicas de PHP

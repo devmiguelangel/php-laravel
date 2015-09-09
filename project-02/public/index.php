@@ -1,12 +1,7 @@
 <?php
 
-use App\Http\Controllers\HomeController;
-use Illuminate\Http\Request;
-
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$request = Request::capture();
+$application = new \App\Application(new \Illuminate\Container\Container());
 
-$controller = new HomeController();
-
-$controller->index($request);
+$application->run();
