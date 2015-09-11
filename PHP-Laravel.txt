@@ -476,7 +476,65 @@ $application->run();
 
 3.  Buenas practicas de PHP
 3.1.  Arquitectura de capas
+- Patrones de Arquitectura Capas (Layers)
+  - Separa los roles a nivel de arquitectura
+  - Define la interaccion entre cada rol
+  - Ayuda a contruir software mas robusto
+  - Evita el codigo spaguetti
+
+- HTTP (Controllers - Views)
+- Consola (Comands)
+- API (Controllers - Transformers)
+- Modelo de Dominio (Entities Services - Value Objects - Events Exceptions)
+- Infraestructura - Datos (Repositories [Base de Datos] - Adapters [APIs])
+
+
 3.2.  Servicios
+- Coordinadores de dominio
+- No tienen estados (stateless)
+- Se comunica con infraestructura
+- Responde pedidos de capas superiores
+
+- src/Domain/Imprint.php
+class Imprint
+{
+    private $db;
+
+    public function __construct(FakeDatabase $db)
+    {
+        $this->db = $db;
+    }
+
+    public function listPublishedPosts()
+    {
+        return $this->db->posts();
+    }
+}
+
+- src/Http/Controllers/HomeController.php
+class HomeController
+{
+    private $imprint;
+
+    public function __construct(Imprint $imprint)
+    {
+        $this->imprint = $imprint;
+    }
+
+    public function index(Request $request)
+    {
+        $posts = $this->imprint->listPublishedPosts();
+        ...
+    }
+
+    public function show($id)
+    {
+        $posts = $this->imprint->listPublishedPosts();
+        ...
+    }
+}
+
+
 3.3.  Persistencia y Base de Datos
 3.4.  Repositorios
 3.5.  Errores y Excepciones
