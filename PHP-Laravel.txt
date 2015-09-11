@@ -536,6 +536,98 @@ class HomeController
 
 
 3.3.  Persistencia y Base de Datos
+- Crear/Editar/Eliminar datos
+- Guardar datos entre servicios
+- Optimizados para busqueda
+- Transaccional
+- Relacionales (SQL)
+  - MySQL
+  - PostgreSQL
+  - Oracle
+  etc...
+- No relacionales (NoSQL)
+  - MongoDB
+  - Redis
+  - Cassandra
+  etc...
+
+- PDO - PHP Data Objects
+  - Abstraccion de base de datos
+  - Modelo de objetos
+  - Estandar recomendado por la comunidad
+
+php -m
+
+- src/Infrastructure/Database.php
+class Database
+{
+    public function posts()
+    {
+        $pdo = new \PDO('mysql:dbname=test_php;host=127.0.0.1', 'homestead', 'secret');
+        
+        $sql = 'SELECT * FROM posts;';
+
+        $sth = $pdo->prepare($sql);
+        $sth->execute();
+
+        $results = $this->mapToPosts($sth->fetchAll());
+        return $results;
+    }
+
+    private function mapToPosts(array $results)
+    {
+        $posts = new Collection();
+
+        foreach ($results as $result) {
+            $post = new Post(
+                $result['author_id'],
+                $result['title'],
+                $result['body'],
+                $result['id']
+            );
+
+            $posts->push($post);
+        }
+
+        return $posts;
+    }
+}
+
+- src/Domain/Post.php
+public function __construct($authorId, $title, $body, $id = null)
+{
+    $this->author = $authorId;
+    $this->title  = $title;
+    $this->body   = $body;
+    $this->id     = $id;
+}
+
+public function create(Author $author, $title, $body)
+{
+    $post = new Post($author, $title, $body);
+    return $post;
+}
+
+- tests/DatabaseTest.php
+class DatabaseTest extends PHPUnit_Framework_TestCase
+{
+    public function testConnection()
+    {
+        $db = new Database();
+
+        $results = $db->posts();
+
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $results);
+
+        foreach ($results as $post) {
+            $this->assertInstanceOf(\App\Domain\Post::class, $post);
+        }
+    }
+}
+
+./vendor/bin/phpunit tests/DatabaseTest --color=always
+
+
 3.4.  Repositorios
 3.5.  Errores y Excepciones
 
