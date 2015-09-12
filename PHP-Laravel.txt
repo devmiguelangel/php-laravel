@@ -629,6 +629,136 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
 
 
 3.4.  Repositorios
+- Encapsulan el acceso a datosç
+- Se modela como una coleccion
+- Separan logica de persistencia
+
+- src/Infrastructure/PostRepository.php
+class PostRepository
+{
+    public function getPDO()
+    {
+        return new \PDO('mysql:dbname=test_php;host=127.0.0.1', 'homestead', 'secret');
+    }
+
+    public function posts()
+    {
+        $pdo = $this->getPDO();
+
+        $sql = 'SELECT * FROM posts;';
+
+        $sth = $pdo->prepare($sql);
+        $sth->execute();
+
+        $results = $this->mapToPosts($sth->fetchAll());
+
+        return $results;
+    }
+
+    public function find($id)
+    {
+        $pdo = $this->getPDO();
+
+        $sql = 'SELECT * FROM posts WHERE id = :id ;';
+
+        $sth = $pdo->prepare($sql);
+        $sth->bindParam(':id', $id, \PDO::PARAM_INT);
+
+        $sth->execute();
+        
+        $result = $sth->fetch();
+
+        if ($result === false) {
+            throw new \OutOfBoundsException('Post does not exist!');
+        }
+
+        return $this->mapPost($result);
+    }
+
+    public function search($text)
+    {
+        $pdo = $this->getPDO();
+
+        $sql = 'SELECT * FROM posts WHERE title LIKE :text OR body LIKE :text;';
+
+        $sth = $pdo->prepare($sql);
+
+        $text = '%' . $text . '%';
+        $sth->bindParam(':text', $text, \PDO::PARAM_STR);
+
+        $sth->execute();
+
+        return $this->mapToPosts($sth->fetchAll());
+    }
+
+    private function mapToPosts(array $results)
+    {
+        $posts = new Collection();
+
+        foreach ($results as $result) {
+            $post = $this->mapPost($result);
+
+            $posts->push($post);
+        }
+
+        return $posts;
+    }
+
+    private function mapPost($result)
+    {
+        return new Post(
+            $result['author_id'],
+            $result['title'],
+            $result['body'],
+            $result['id']
+        );
+    }
+}
+
+- tests/PostRepositoryTest.php
+class PostRepositoryTest extends PHPUnit_Framework_TestCase
+{
+    public function testGetAllPosts()
+    {
+        $db = new PostRepository();
+
+        $results = $db->posts();
+
+        $this->assertInstanceOf(Collection::class, $results);
+
+        foreach ($results as $post) {
+            $this->assertInstanceOf(\App\Domain\Post::class, $post);
+        }
+    }
+
+    public function testFindAPost()
+    {
+        $db = new PostRepository();
+
+        $post = $db->find(2);
+
+        $this->assertInstanceOf(\App\Domain\Post::class, $post);
+    }
+
+    public function testNotFindAPost()
+    {
+        $db = new PostRepository();
+
+        $this->setExpectedException(\OutOfBoundsException::class);
+        $post = $db->find(2333);
+    }
+
+    public function testSearchATextInPost()
+    {
+        $db = new PostRepository();
+
+        $posts = $db->search('#4');
+
+        $this->assertInstanceOf(Collection::class, $posts);
+    }
+}
+
+
 3.5.  Errores y Excepciones
 
 
