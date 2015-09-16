@@ -3,19 +3,19 @@
 namespace App\Domain;
 
 
-use App\Infrastructure\FakeDatabase;
+use App\Infrastructure\PostRepository;
 use Illuminate\Support\Collection;
 
 class Imprint
 {
-    private $db;
+    private $posts;
 
     /**
-     * @param FakeDatabase $db
+     * @param PostRepository $posts
      */
-    public function __construct(FakeDatabase $db)
+    public function __construct(PostRepository $posts)
     {
-        $this->db = $db;
+        $this->posts = $posts;
     }
 
     /**
@@ -23,6 +23,10 @@ class Imprint
      */
     public function listPublishedPosts()
     {
-        return $this->db->posts();
+        return $this->posts->posts();
+    }
+
+    public function findById($id) {
+        return $this->posts->find($id);
     }
 }

@@ -6,13 +6,8 @@ namespace App\Infrastructure;
 use App\Domain\Post;
 use Illuminate\Support\Collection;
 
-class PostRepository
+class PostRepository extends BaseRepository
 {
-    public function getPDO()
-    {
-        return new \PDO('mysql:dbname=test_php;host=127.0.0.1', 'homestead', 'secret');
-    }
-
     public function posts()
     {
         $pdo = $this->getPDO();
@@ -25,26 +20,6 @@ class PostRepository
         $results = $this->mapToPosts($sth->fetchAll());
 
         return $results;
-    }
-
-    public function find($id)
-    {
-        $pdo = $this->getPDO();
-
-        $sql = 'SELECT * FROM posts WHERE id = :id ;';
-
-        $sth = $pdo->prepare($sql);
-        $sth->bindParam(':id', $id, \PDO::PARAM_INT);
-
-        $sth->execute();
-        
-        $result = $sth->fetch();
-
-        if ($result === false) {
-            throw new \OutOfBoundsException('Post does not exist!');
-        }
-
-        return $this->mapPost($result);
     }
 
     public function search($text)
@@ -68,7 +43,7 @@ class PostRepository
         $posts = new Collection();
 
         foreach ($results as $result) {
-            $post = $this->mapPost($result);
+            $post = $this->mapEntity($result);
 
             $posts->push($post);
         }
@@ -76,7 +51,19 @@ class PostRepository
         return $posts;
     }
 
-    private function mapPost($result)
+    /**
+     * @return string
+     */
+    protected function table()
+    {
+        return 'posts';
+    }
+
+    /**
+     * @param array $result
+     * @return mixed
+     */
+    protected function mapEntity(array $result)
     {
         return new Post(
             $result['author_id'],

@@ -43,7 +43,7 @@ class PostRepositoryTest extends PHPUnit_Framework_TestCase
         $db = new PostRepository();
 
         $posts = $db->search('#4');
-        var_dump($posts);
+        // var_dump($posts);
 
         $this->assertInstanceOf(Collection::class, $posts);
     }

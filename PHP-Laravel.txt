@@ -760,11 +760,227 @@ class PostRepositoryTest extends PHPUnit_Framework_TestCase
 
 
 3.5.  Errores y Excepciones
+- Detienen el flujo normal de la aplicacion
+- Comunican que fallo
+- Nos permiten reacionar al error y decidir como continuar
+
+- src/Domain/EntityNotFound.php
+class EntityNotFound extends \OutOfBoundsException
+{
+    private $id;
+
+    public function __construct($id, $message = '', $code = 0, \Exception $previous = null)
+    {
+        $this->id = $id;
+
+        parent::__construct($message, $code, $previous);
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+}
+
+- src/Infrastructure/BaseRepository.php
+abstract class BaseRepository
+{
+
+    protected static $pdo;
+
+    abstract protected function table();
+
+    abstract protected function mapEntity(array $result);
+
+    protected function getPDO()
+    {
+        if (! self::$pdo) {
+            self::$pdo = new \PDO('mysql:dbname=test_php;host=127.0.0.1', 'homestead', 'secret');
+        }
+
+        return self::$pdo;
+    }
+
+    public function find($id)
+    {
+        $pdo = $this->getPDO();
+
+        $sql = 'SELECT * FROM ' . $this->table() . ' WHERE id = :id ;';
+
+        $sth = $pdo->prepare($sql);
+        $sth->bindParam(':id', $id, \PDO::PARAM_INT);
+
+        $sth->execute();
+
+        $result = $sth->fetch();
+
+        if ($result === false) {
+            throw new EntityNotFound($id, strtoupper($this->table()) . $id . ' does not exist!');
+        }
+
+        return $this->mapEntity($result);
+    }
+}
+
+- src/Infrastructure/PostRepository.php
+class PostRepository extends BaseRepository
+{
+    public function posts()
+    {
+        $pdo = $this->getPDO();
+
+        $sql = 'SELECT * FROM posts;';
+
+        $sth = $pdo->prepare($sql);
+        $sth->execute();
+
+        $results = $this->mapToPosts($sth->fetchAll());
+
+        return $results;
+    }
+
+    private function mapToPosts(array $results)
+    {
+        $posts = new Collection();
+
+        foreach ($results as $result) {
+            $post = $this->mapEntity($result);
+
+            $posts->push($post);
+        }
+
+        return $posts;
+    }
+
+    protected function table()
+    {
+        return 'posts';
+    }
+
+    protected function mapEntity(array $result)
+    {
+        return new Post(
+            $result['author_id'],
+            $result['title'],
+            $result['body'],
+            $result['id']
+        );
+    }
+}
+
+- src/Infrastructure/AuthorRepository.php
+class AuthorRepository extends BaseRepository
+{
+    protected function table()
+    {
+        return 'users';
+    }
+
+    protected function mapEntity(array $result)
+    {
+        return new Author(
+            $result['email'],
+            $result['password'],
+            'AUTHOR'
+        );
+    }
+}
+
+- src/Domain/Post.php
+class Post
+{
+    public function __construct($author, $title, $body, $id = null)
+    {
+        $this->setAuthor($author);
+        ...
+    }
+
+    private function setAuthor($author)
+    {
+        if ($author instanceof Author) {
+            $this->author = $author;
+        } else {
+            $repository = new AuthorRepository();
+            $this->author = $repository->find($author);
+        }
+    }
+}
+
+- src/Domain/Imprint.php
+class Imprint
+{
+    private $posts;
+
+    public function __construct(PostRepository $posts)
+    {
+        $this->posts = $posts;
+    }
+
+    public function listPublishedPosts()
+    {
+        return $this->posts->posts();
+    }
+
+    public function findById($id) {
+        return $this->posts->find($id);
+    }
+}
+
+- src/Http/Controllers/HomeController.php
+class HomeController
+{
+    private $imprint;
+
+    public function index(Request $request)
+    {
+        $posts = $this->imprint->listPublishedPosts();
+        $first = $posts->first();
+
+        $params = [
+            'message' => 'Hello from a View!',
+            'posts'   => $posts,
+            'first'   => $first,
+        ];
+
+        $view = new View('home', $params);
+        return $view->render();
+    }
+
+    public function show($id)
+    {
+        $post = $this->imprint->findById($id);
+
+        $view = new View('post', [
+            'post' => $post
+        ]);
+
+        return $view->render();
+    }
+}
 
 
-4.
-5.
-6.
+4.  Introduccion a Laravel
+4.1.  Que es Laravel?
+4.2.  Instalacion
+4.3.  Maquinas virtuales y Homestead
+4.4.  Configuracion del entorno
+4.5.  Configuracion del proyecto
+4.6.  Rutas
+4.7.  Controladores
+4.8.  Elixir
+4.9.  Linea de comandos Artisan
+4.10. Migraciones
+
+
+5.  Migraciones, Eloquent, Relaciones y Colecciones en Laravel
+5.1.  Eloquent
+5.2.  Relacion entre modelos de datos I
+5.3.  Relacion entre modelos de datos II
+5.4.  Creando la base de la aplicacion
+5.5.  Enviando datos a la vista
+
+
+6.  Buenas practicas en Laravel
 
 7. Ignite
 - Evitar Data Transfer
