@@ -961,15 +961,61 @@ class HomeController
 
 4.  Introduccion a Laravel
 4.1.  Que es Laravel?
+- Laravel es un framework moderno de PHP
+
+- Objetivos
+  - Empezar proyectos rapidamente
+  - Divertido de usar
+  - Facil de entender
+  - Promueve buenas practicas
+  - Promueve los patrones S.O.L.I.D
+
+- La Base
+  - Composer
+  - Componentes de Symfony
+  - Swiftmail
+  - Monolog (Logs de errores)
+  - Carbon
+  - PSR-7
+
+- Principales Caracteristicas
+  - Artisan CLI
+  - Controladores
+  - Eloquent ORM
+  - Migraciones
+  - Blade Templates
+  - Poderoso Router
+  - Cache
+  - Eventos
+  - Autenticacion
+  - Queues
+  - ACL
+  - Poderoso contenedor
+  - Real Time
+
+- Ecosistema
+  - Homestead (Maquina Virtual)
+  - Support
+  - Cashier y Socialite (Authentication OAuth2)
+  - Elixir (API para usar gulp)
+  - Forge (Provisionar servidores desde cero)
+  - Envoyer
+
+
 4.2.  Instalacion
-4.3.  Maquinas virtuales y Homestead
-4.4.  Configuracion del entorno
-4.5.  Configuracion del proyecto
-4.6.  Rutas
-4.7.  Controladores
-4.8.  Elixir
-4.9.  Linea de comandos Artisan
-4.10. Migraciones
+composer global require "laravel/installer=~1.1"
+
+> laravel new [name-project]
+> laravel
+> php artisan
+
+
+4.3.  Configuracion del proyecto
+4.4.  Rutas
+4.5.  Controladores
+4.6.  Elixir
+4.7.  Linea de comandos Artisan
+4.8. Migraciones
 
 
 5.  Migraciones, Eloquent, Relaciones y Colecciones en Laravel
